@@ -1,5 +1,5 @@
 const fs = require("fs/promises");
-const FILE_PATH = "/Users/mastermindapple/Desktop/UNCC-code/streams/test.txt";
+const FILE_PATH = "/Users/mastermindapple/Desktop/UNCC-code/streams/src.txt";
 
 //----------------------------Promises(Traditional Slow approach)-----------------
 // Time: 10s
@@ -56,7 +56,8 @@ const run3 = async () => {
   const stream = fileHandler.createWriteStream();
   console.time("writeMany");
   let i = 0;
-  let loopCount = 1e6;
+  let loopCount = 1e9; // -- For readable stream this number. or for monitoring activity
+  // let loopCount = 1e6;
 
   const writeToStreamAfterDrain = () => {
     while (i < loopCount) {
