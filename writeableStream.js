@@ -38,7 +38,6 @@ const run2 = async () => {
     stream.write(buff);
   }
   console.timeEnd("writeMany");
-  await fileHandler.close();
 };
 
 // run2().catch((e) => {
