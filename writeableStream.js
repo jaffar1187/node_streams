@@ -55,8 +55,8 @@ const run3 = async () => {
   const stream = fileHandler.createWriteStream();
   console.time("writeMany");
   let i = 0;
-  let loopCount = 1e9; // -- For readable stream this number. or for monitoring activity
-  // let loopCount = 1e6;
+  // let loopCount = 1e9; // -- For readable stream this number. or for monitoring activity
+  let loopCount = 1e9;
 
   const writeToStreamAfterDrain = () => {
     while (i < loopCount) {

@@ -2,43 +2,71 @@ const fs = require("fs/promises");
 const SRC_PATH = "/Users/mastermindapple/Desktop/UNCC-code/streams/src.txt";
 const DEST_PATH = "/Users/mastermindapple/Desktop/UNCC-code/streams/dest.txt";
 
-const run1 = async () => {
-  const fileHandleRead = await fs.open(SRC_PATH, "r");
-  const read_stream = fileHandleRead.createReadStream();
+const isEven = (chunk) => {
+  let final_chunk = [];
+  console.log(chunk);
+  chunk.forEach((num) => {
+    if (Number(num) % 2 === 0) final_chunk.push(num);
+    else if (num === " ") {
+      final_chunk.push(num);
+    }
+  });
+  return final_chunk;
+};
 
-  const fileHandlewrite = await fs.open(DEST_PATH, "w");
-  const write_stream = fileHandlewrite.createWriteStream();
+const run = async () => {
+  const read_from_file = await fs.open(SRC_PATH, "r");
+  const read_from_stream = read_from_file.createReadStream();
 
-  read_stream.on("data", (chunk) => {
-    read_stream.pause();
-    let loop_count = chunk.length - 16384;
-    let i = 0;
+  const write_to_file = await fs.open(DEST_PATH, "w");
+  const write_to_stream = write_to_file.createWriteStream();
 
-    writeToStreamAfterDrain = () => {
-      while (i <= loop_count) {
-        if (i == 0) {
-          if (!write_stream.write(chunk.slice(i, i + 16384))) {
-            i += 16384;
-            break;
-          }
-        } else {
-          if (!write_stream.write(chunk.slice(i, i + 16385))) {
-            i += 16384;
-            break;
-          }
-        }
-      }
-      if (i > loop_count) read_stream.resume();
-    };
+  let last_num;
 
-    writeToStreamAfterDrain();
+  //Read Event
+  read_from_stream.on("data", (chunk) => {
+    read_from_stream.pause();
+    chunk = chunk.toString().split(" ");
 
-    write_stream.on("drain", () => {
-      writeToStreamAfterDrain();
-    });
+    //Removing empty strings.
+    if (chunk[0] === "") {
+      chunk[0] = " ";
+    }
+    if (chunk[chunk.length - 1] === "") {
+      chunk[chunk.length - 1] = " ";
+    }
+
+    //If first number is incomplete
+    if (chunk[0] !== " " && Number(chunk[0]) + 1 !== Number(chunk[1])) {
+      if (last_num) chunk[0] = last_num.toString() + chunk[0];
+    }
+
+    //If last number is incomplete
+    if (
+      chunk[chunk.length - 1] !== " " &&
+      Number(chunk[chunk.length - 1]) - 1 !== Number(chunk[chunk.length - 2])
+    ) {
+      last_num = chunk.pop();
+    }
+
+    // console.log(chunk);
+
+    // console.log(chunk);
+
+    let final_chunk = isEven(chunk);
+    // if (!write_to_stream.write(final_chunk.join(" "))) read_from_stream.pause();
+    write_to_stream.write(final_chunk.join(" "));
+  });
+
+  //Write Event
+  write_to_stream.on("drain", () => {
+    read_from_stream.resume();
+  });
+
+  //Finished reading
+  read_from_stream.on("end", () => {
+    console.log("Done");
   });
 };
 
-run1().catch((e) => {
-  console.log("Some error occurred", e);
-});
+run();
